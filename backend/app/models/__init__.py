@@ -22,6 +22,7 @@ from app.models.productivity_benchmark import ProductivityBenchmark
 from app.models.audit_log import AuditLog, AuditAction
 from app.models.delay_impact import DelayImpact, ImpactType
 from app.models.delay_prediction import DelayPrediction, ModelTrainingRun
+from app.models.knowledge_base import KnowledgeBaseEmbedding, KnowledgeSourceType
 
 __all__ = [
     "ProgressEvent",
@@ -53,4 +54,6 @@ __all__ = [
     "ImpactType",
     "DelayPrediction",
     "ModelTrainingRun",
+    "KnowledgeBaseEmbedding",
+    "KnowledgeSourceType",
 ]

@@ -17,6 +17,7 @@ import {
   Menu,
   ChevronDown,
   Building2,
+  BookOpen,
 } from 'lucide-react'
 
 const navigation = [
@@ -27,6 +28,7 @@ const navigation = [
   { name: 'Inbound', href: '/inbound', icon: Inbox },
   { name: 'Insights', href: '/insights', icon: BarChart3 },
   { name: 'Risk Watchlist', href: '/risk', icon: AlertTriangle },
+  { name: 'Knowledge Base', href: '/knowledge-base', icon: BookOpen },
   { name: 'BIM Viewer', href: '/bim', icon: Box },
 ]
 
