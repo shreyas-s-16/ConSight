@@ -14,6 +14,7 @@ from app.schemas.knowledge_base import (
 from app.models.knowledge_base import KnowledgeBaseEmbedding, KnowledgeSourceType
 from app.core.auth import get_current_user, require_organization_access
 from app.models.user import User
+from app.models.project import Project
 
 router = APIRouter(prefix="/knowledge-base", tags=["Knowledge Base"])
 
@@ -22,26 +23,18 @@ router = APIRouter(prefix="/knowledge-base", tags=["Knowledge Base"])
 async def query_knowledge_base(
     request: KnowledgeBaseQueryRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_organization_access),
 ):
     """
     Query the institutional knowledge base using natural language.
     Returns an answer with cited sources from delay reasons, productivity benchmarks,
     glossary mappings, WBS nodes, and project summaries.
     """
-    # Verify user has access to the organization
-    if not require_organization_access(current_user, db):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Insufficient permissions to access knowledge base"
-        )
-
     # Get organization_id from user
     organization_id = current_user.organization_id
 
     # If project_id provided, verify access
     if request.project_id:
-        from app.models.project import Project
         project = db.query(Project).filter(
             Project.id == request.project_id,
             Project.organization_id == organization_id
@@ -81,23 +74,16 @@ async def query_knowledge_base(
 async def index_knowledge_base(
     request: KnowledgeBaseIndexRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_organization_access),
 ):
     """
     Build or rebuild the knowledge base embeddings from institutional memory sources.
     Sources include: delay reasons, productivity benchmarks, glossary mappings,
     WBS nodes, project summaries, and closed project summaries.
     """
-    if not require_organization_access(current_user, db):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Insufficient permissions to index knowledge base"
-        )
-
     organization_id = current_user.organization_id
 
     if request.project_id:
-        from app.models.project import Project
         project = db.query(Project).filter(
             Project.id == request.project_id,
             Project.organization_id == organization_id
@@ -122,15 +108,9 @@ async def index_knowledge_base(
 async def get_knowledge_base_stats(
     project_id: Optional[int] = Query(None, description="Optional project ID to filter stats"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_organization_access),
 ):
     """Get statistics about the knowledge base embeddings."""
-    if not require_organization_access(current_user, db):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Insufficient permissions to access knowledge base stats"
-        )
-
     organization_id = current_user.organization_id
 
     query = db.query(
@@ -141,7 +121,6 @@ async def get_knowledge_base_stats(
     )
 
     if project_id:
-        from app.models.project import Project
         project = db.query(Project).filter(
             Project.id == project_id,
             Project.organization_id == organization_id
@@ -164,7 +143,6 @@ async def get_knowledge_base_stats(
         KnowledgeBaseEmbedding.project_id.isnot(None)
     ).group_by(KnowledgeBaseEmbedding.project_id).all()
 
-    from app.models.project import Project
     project_names = {p.id: p.name for p in db.query(Project).filter(
         Project.organization_id == organization_id
     ).all()}
