@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **P13-advanced-rag**: Advanced RAG over institutional memory per PRD §5.9/P13 and add-on Phase 13
+  - KnowledgeBaseEmbedding model with pgvector (384-dim) storing embeddings of delay_reasons, productivity_benchmarks, glossary_mappings, wbs_nodes, project_summaries, closed_project_summaries
+  - KnowledgeBaseService with sentence-transformers (all-MiniLM-L6-v2) embeddings, semantic search via pgvector (<=> operator on PostgreSQL, keyword fallback on SQLite), template-based answer generation with cited sources
+  - API endpoints: /knowledge-base/query (natural language query with cited sources), /knowledge-base/index (rebuild embeddings), /knowledge-base/stats (embedding statistics), /knowledge-base/sources (available source types)
+  - Frontend: KnowledgeBase screen with conversational chat interface, source filters, top-K selector, real-time confidence scores, copy-to-clipboard for sources
+  - Added sentence-transformers==3.0.1 and torch==2.3.1 dependencies
+  - Alembic migrations for knowledge_base_embeddings table with embedding dimension fix (1536→384)
+  - 196 backend tests pass, frontend builds successfully
+
 - **P12-ocr-scanned-diaries**: Real OCR pipeline (Tesseract) for scanned diaries per PRD §6.1/P12 and add-on Phase 12
   - OCRService with Tesseract OCR supporting multiple languages (eng, hin, tam, tel, kan)
   - PDF and image processing (PDF, PNG, JPG, TIFF, BMP, WebP) with preprocessing for better accuracy

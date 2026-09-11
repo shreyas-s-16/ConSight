@@ -38,6 +38,14 @@ from app.schemas.confidence import (
     AuditRecordResponse,
     AuditTrailResponse,
 )
+from app.schemas.knowledge_base import (
+    KnowledgeBaseQueryRequest,
+    KnowledgeBaseQueryResponse,
+    KnowledgeSourceCitation,
+    KnowledgeBaseIndexRequest,
+    KnowledgeBaseIndexResponse,
+    KnowledgeBaseStatsResponse,
+)
 
 __all__ = [
     "ProgressEventBase",
@@ -72,4 +80,10 @@ __all__ = [
     "CreateNewActivityRequest",
     "AuditRecordResponse",
     "AuditTrailResponse",
+    "KnowledgeBaseQueryRequest",
+    "KnowledgeBaseQueryResponse",
+    "KnowledgeSourceCitation",
+    "KnowledgeBaseIndexRequest",
+    "KnowledgeBaseIndexResponse",
+    "KnowledgeBaseStatsResponse",
 ]

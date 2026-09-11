@@ -179,6 +179,17 @@ export const auditApi = {
     api.get('/audit/logs', { params }),
 }
 
+export const knowledgeBaseApi = {
+  query: (data: { query: string; project_id?: number; source_types?: string[]; top_k?: number }) =>
+    api.post('/knowledge-base/query', data),
+  index: (projectId?: number) =>
+    api.post('/knowledge-base/index', { project_id: projectId }),
+  getStats: (projectId?: number) =>
+    api.get('/knowledge-base/stats', { params: { project_id: projectId } }),
+  getSourceTypes: () =>
+    api.get('/knowledge-base/sources'),
+}
+
 export const wbsApi = {
   getTree: (projectId: number) => api.get(`/wbs/tree/${projectId}`),
   getNode: (id: number) => api.get(`/wbs/nodes/${id}`),

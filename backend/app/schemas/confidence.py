@@ -42,6 +42,7 @@ class ConfidenceEvaluationResponse(BaseModel):
     review_id: Optional[int] = None
     score_breakdown: Optional[ConfidenceScoreBreakdown] = None
     top_candidates: List[MatchedActivity] = []
+    pmis_push: Optional[dict] = None
 
 
 class ReviewCandidate(BaseModel):

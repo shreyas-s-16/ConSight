@@ -13,6 +13,7 @@ import { RiskWatchlist } from './features/risk/RiskWatchlist'
 import { BIMViewer } from './features/bim/BIMViewer'
 import { AdminPanel } from './features/admin/AdminPanel'
 import { Settings } from './features/settings/Settings'
+import { KnowledgeBase } from './features/knowledge/KnowledgeBase'
 
 function ProtectedRoute({ children, allowedRoles }: { children: React.ReactNode; allowedRoles?: string[] }) {
   const { isAuthenticated, isLoading, user, hasRole } = useAuth()
@@ -75,6 +76,7 @@ export function App() {
         <Route path="inbound" element={<InboundChannels />} />
         <Route path="insights" element={<Insights />} />
         <Route path="risk" element={<RiskWatchlist />} />
+        <Route path="knowledge-base" element={<KnowledgeBase />} />
         <Route path="bim" element={<BIMViewer />} />
         <Route
           path="admin"
