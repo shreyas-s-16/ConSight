@@ -1,4 +1,5 @@
 import json
+import logging
 from datetime import date
 from typing import Optional
 from sqlalchemy.orm import Session
@@ -25,6 +26,9 @@ from app.services.confidence_engine import (
     ConfidenceBreakdown,
 )
 from app.services.delay_ripple_service import DelayRippleService
+from app.services.pmis_push import push_actuals_to_pmis_sync
+
+logger = logging.getLogger(__name__)
 
 
 def evaluate_confidence(db: Session, progress_event_id: int) -> dict:
@@ -95,6 +99,16 @@ def evaluate_confidence(db: Session, progress_event_id: int) -> dict:
         db.refresh(confidence_result)
         db.refresh(audit)
         
+        # Push actuals to PMIS (Primavera P6 / MS Project) on auto-commit
+        pmis_result = None
+        pmis_error = None
+        try:
+            pmis_result = push_actuals_to_pmis_sync(db, progress_event_id, proposed_activity_id, confidence_score)
+            logger.info(f"PMIS push on auto-commit: success={pmis_result.success}, target={pmis_result.target_url}, status={pmis_result.response_status}")
+        except Exception as e:
+            pmis_error = str(e)
+            logger.warning(f"PMIS push on auto-commit failed (non-blocking): {e}")
+        
         return {
             "progress_event_id": progress_event_id,
             "proposed_activity": {
@@ -108,6 +122,13 @@ def evaluate_confidence(db: Session, progress_event_id: int) -> dict:
             "decision": "AUTO_MATCH",
             "requires_review": False,
             "review_id": None,
+            "pmis_push": {
+                "success": pmis_result.success if pmis_result else False,
+                "target_url": pmis_result.target_url if pmis_result else "",
+                "response_status": pmis_result.response_status if pmis_result else None,
+                "attempt_count": pmis_result.attempt_count if pmis_result else 0,
+                "error_message": pmis_result.error_message if pmis_result else pmis_error,
+            },
             "score_breakdown": {
                 "exact_identifier_strength": breakdown.exact_identifier_strength,
                 "fuzzy_similarity": breakdown.fuzzy_similarity,
@@ -246,6 +267,15 @@ def approve_review(db: Session, review_id: int, reviewer_note: Optional[str] = N
     
     db.commit()
     db.refresh(review)
+    
+    # Push actuals to PMIS on planner approval
+    if event and review.proposed_activity_id:
+        try:
+            pmis_result = push_actuals_to_pmis_sync(db, review.progress_event_id, review.proposed_activity_id, review.confidence_score)
+            logger.info(f"PMIS push on approve: success={pmis_result.success}, target={pmis_result.target_url}, status={pmis_result.response_status}")
+        except Exception as e:
+            logger.warning(f"PMIS push on approve failed (non-blocking): {e}")
+    
     return review
 
 
@@ -308,6 +338,15 @@ def correct_review(db: Session, review_id: int, activity_id: int, reviewer_note:
     
     db.commit()
     db.refresh(review)
+    
+    # Push actuals to PMIS on planner correction
+    if event:
+        try:
+            pmis_result = push_actuals_to_pmis_sync(db, review.progress_event_id, activity_id, review.confidence_score)
+            logger.info(f"PMIS push on correct: success={pmis_result.success}, target={pmis_result.target_url}, status={pmis_result.response_status}")
+        except Exception as e:
+            logger.warning(f"PMIS push on correct failed (non-blocking): {e}")
+    
     return review
 
 
@@ -421,6 +460,15 @@ def create_new_activity(
     db.commit()
     db.refresh(review)
     db.refresh(new_activity)
+    
+    # Push actuals to PMIS on new activity creation
+    if event:
+        try:
+            pmis_result = push_actuals_to_pmis_sync(db, review.progress_event_id, new_activity.id, review.confidence_score)
+            logger.info(f"PMIS push on new activity: success={pmis_result.success}, target={pmis_result.target_url}, status={pmis_result.response_status}")
+        except Exception as e:
+            logger.warning(f"PMIS push on new activity failed (non-blocking): {e}")
+    
     return review
 
 

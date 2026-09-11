@@ -26,6 +26,13 @@ class Settings(BaseSettings):
     WHATSAPP_VERIFY_TOKEN: str = ""
     WHATSAPP_WEBHOOK_SECRET: str = ""
 
+    # PMIS Push (Primavera P6 / MS Project)
+    PMIS_PUSH_ENDPOINT_URL: str = ""
+    PMIS_PUSH_API_KEY: str = ""
+    PMIS_PUSH_TIMEOUT_SECONDS: int = 30
+    PMIS_PUSH_MAX_RETRIES: int = 3
+    PMIS_PUSH_RETRY_BACKOFF_SECONDS: int = 2
+
     class Config:
         env_file = ".env"
         extra = "ignore"
